@@ -1,49 +1,51 @@
 # -*- coding: utf-8 -*-
 """
-二叉树数据结构的实现
-
-ADT BinTree:
-    BinTree(self, data, left, right)  # 二叉树抽象数据类型
-    is_empty(self)  # 是否为空树
-    num_nodes(self)  # 节点个数
-    data(self)  # 获取树根存储的数据
-    left(self)  # 获取左子树
-    right(self)  # 获取右子树
-    set_left(self,btree)  #  用btree取代原来的左子树
-    set_right(self,btree)  # 用btree取代原来的右子树
-    traveral(self)  # 遍历各节点的迭代器
-    forall(self,op)  # 广播操作
+定义二叉树类
 """
 
-def BinTree(data, left=None, right=None):
-    return [data, left, right]
-
-def is_empty_BinTree(btree):
-    return btree is None
-
-def left(btree):
-    return btree[1]
-
-def right(btree):
-    return btree[2]
-
-def set_root(btree, data):
-    btree[0] = data
-
-def set_left(btree, data):
-    btree[1] = data
-
-def set_right(btree, data):
-    btree[2] = data
+class BinTNode(object):
+    def __init__(self, dat, left=None, right=None):
+        self.data = dat
+        self.left = left
+        self.right = right
 
 
-def test():
-    b = BinTree(2, BinTree(4), BinTree(8))
-    print b
-    set_left(b, BinTree(5))
-    print b
+class BinTree(object):
+    """docstring for BinTree"""
+    def __init__(self):
+        super(BinTree, self).__init__()
+        self._root = None
+
+    def is_empty(self):
+        return self._root is None
+
+    def root(self):
+        return self._root
+
+    def lchild(self):
+        return self._root.left
+
+    def rchild(self):
+        return self._root.right
+
+    def set_root(self, rootnode):
+        self._root = rootnode
+
+    def set_lchild(self, leftchild):
+        self._root.left = leftchild
+
+    def set_rchild(self, rightchild):
+        self._root.right = rightchild
+
+    def preorder_elements(self):
+        t, s = self._root, []
+        while t is not None or s:
+            while t is not None:
+                s.append(t.right)
+                yield t.data
+                t = t.left
+            t = s.pop()
 
 
 if __name__ == '__main__':
-    test()
-
+    pass
