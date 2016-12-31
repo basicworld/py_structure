@@ -170,6 +170,108 @@ if __name__ == '__main__':
 
 具体的实现可以用链接表或连续表。实际中常用顺序表表示顶点，每个顶点关联一个表示邻接边表的链表。（跟树的邻接表实现方式类似）
 
+```python
+
+class GraphError(ValueError):
+    pass
+
+class Graph(object):
+    """使用邻接表实现图结构"""
+    def __init__(self, mat=[], unconn=0):
+        """
+        从邻接矩阵构造初始邻接表
+        支持从空图出发来构建图对象
+        构造的表是有序邻接表
+        目前缺陷：没有检查初始邻接矩阵的有序性
+
+        @mat 默认邻接矩阵
+        @unconn 非连接的默认值
+        """
+        super(Graph, self).__init__()
+        # self._mat = mat
+        vnum = len(mat)  # 顶点个数
+        # 检查邻接矩阵是否为方阵
+        for x in mat:
+            if len(x) != vnum:
+                raise GraphError(u'mat参数不是方阵')
+
+        # 同样是按下标构建邻接表对象，输出格式[[(1,0)],[(2,1),(2,2)],[]]
+        # 每个子list表示一个顶点,有序
+        # 每个子list中的元组表示（vj, val）,即(边的另一个点，权值)，有序
+        self._mat = [Graph._out_edges(x, unconn) for x in mat]
+
+        self._vnum = vnum
+        self._unconn = unconn
+
+    def add_vertex(self):
+        self._mat.append([])
+        self._vnum += 1
+        return self._vnum - 1
+
+    def add_edge(self, vi, vj, val=1):
+        """
+        vi
+        vj
+        val
+        """
+        if self._vnum == 0:
+            raise GraphError(u'无法为空图添加边，请先使用add_vertex()添加边')
+        if self._invalid(vi) or self._invalid(vj):
+            raise GraphError(u'边值不合法:', (vi, vj))
+        row = self._mat[vi]
+        i = 0
+        while i < len(row):
+            if row[i][0] == vj:
+                self._mat[vi][i] = (vj, val)
+                return
+
+            # 因为下标是有序的，所以一旦row[i][0]大于vj就说明没有这条边
+            if row[i][0] > vj:
+                break
+            i += 1
+        self._mat[vi].insert(i, (vj, val))
+
+    def _invalid(self, v):
+        """检查顶点v是否合法，不合法返回True"""
+        return v < 0 or v >= self._vnum
+
+    def get_edge(self, vi, vj):
+        if self._invalid(vi) or self._invalid(vj):
+            raise GraphError(u'边值不合法:', (vi, vj))
+        for i, val in self._mat[vi]:
+            if i == vj:
+                return val
+        return self._unconn
+
+    def out_edges(self, vi):
+        if self._invalid(vi):
+            raise GraphError(u'边值不合法:', vi)
+        return self._mat[vi]
+
+    @staticmethod
+    def _out_edges(row, unconn):
+        """提取顶点的有效出连接"""
+        return [(i, val) for i, val in enumerate(row) if val != unconn]
+
+    def __str__(self):
+        return ('Graph[\n' + ',\n'.join([str(x) for x in self._mat])\
+                + '\n]Unconn: ' + str(self._unconn))
+
+def test():
+    mat = [[0,0,1],[1,0,1],[0,1,0]]
+    g = Graph(mat)
+    print g
+
+    vi = g.add_vertex()
+    g.add_edge(vi,0,1)
+    g.add_edge(2,2,3)
+    print g
+
+if __name__ == '__main__':
+    test()
+```
+
 # NOTE
 
 1. python里定义大于任意值的值的方法:`inf=float('inf')`（实际上inf构造的值约等于`10e307`）
+2. python里以可变变量作为参数传进函数时，要保证在调用前做一次拷贝，防止修改原来的变量
